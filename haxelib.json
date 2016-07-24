@@ -1,0 +1,12 @@
+{
+  "name": "mammoth",
+  "url" : "https://github.com/BlazingMammothGames/mammoth",
+  "license": "Apache 2.0",
+  "classPath": "src",
+  "tags": [],
+  "description": "",
+  "version": "0.0.0",
+  "releasenote": "",
+  "contributors": ["FuzzyWuzzie"],
+  "dependencies": {}
+}
