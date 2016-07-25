@@ -4,13 +4,12 @@ import edge.Engine;
 import edge.Phase;
 import kha.Assets;
 import kha.Framebuffer;
+import kha.graphics4.Graphics;
 import kha.Scheduler;
 import kha.System;
-import mammoth.lib.ModelMatrixSystem;
-import mammoth.lib.CameraSystem;
+import mammoth.lib.RenderSystem;
 import zui.Id;
 import zui.Zui;
-import mammoth.render.Renderer;
 import mammoth.util.Stats;
 
 class Mammoth {
@@ -26,7 +25,6 @@ class Mammoth {
 	public static var onUpdateEnd(default, null):Array<Float->Void> = new Array<Float->Void>();
 
 	// parts of our system
-	public static var renderer:Renderer;
 	public static var engine:Engine;
 	public static var updatePhase:Phase;
 	public static var renderPhase:Phase;
@@ -40,6 +38,9 @@ class Mammoth {
 	public static var stats:Stats = new Stats();
 	private static var _ui:Zui;
 	private static var _showDebug:Bool = false;
+
+	@:allow(mammoth.lib.RenderSystem)
+	private static var graphics:Graphics;
 
 	public static function init(
 		title:String,
@@ -65,17 +66,13 @@ class Mammoth {
 	}
 
 	private static function prepare(onReady:Void->Void):Void {
-		// initialize our renderer
-		renderer = new Renderer();
-
 		// initialize our ECS
 		engine = new Engine();
 		updatePhase = engine.createPhase();
 		renderPhase = engine.createPhase();
 
 		// set up our render system
-		renderPhase.add(new ModelMatrixSystem());
-		renderPhase.add(new CameraSystem());
+		renderPhase.add(new RenderSystem());
 
 		#if debug
 		// initialize our debug UI
@@ -103,9 +100,8 @@ class Mammoth {
 		var start:Float = System.time;
 		for(cb in onRenderStart) cb(fb);
 
+		graphics = fb.g4;
 		renderPhase.update(0);
-		renderer.render(fb.g4);
-		stats.drawCalls = renderer.drawCalls;
 
 		for(cb in onRenderEnd) cb(fb);
 		var end:Float = System.time;
