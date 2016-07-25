@@ -1,8 +1,9 @@
-package mammoth.lib;
+package mammoth.components;
 
 import edge.IComponent;
 import kha.Color;
 import kha.math.FastVector2;
+import kha.math.FastMatrix4;
 
 enum ProjectionMode {
 	Orthographic(size:Float);
@@ -32,14 +33,13 @@ class Camera implements IComponent {
 
 	public var clearColour:Color = Color.Black;
 
-	private static var _nextCameraID:Int = 0;
-	public var cameraID:Int;
-
+	public var vDirty:Bool = true;
 	public var pDirty:Bool = true;
+	public var v:FastMatrix4 = FastMatrix4.identity();
+	public var p:FastMatrix4 = FastMatrix4.identity();
+	public var vp:FastMatrix4 = FastMatrix4.identity();
 
-	public function new() {
-		cameraID = _nextCameraID++;
-	}
+	public function new() {}
 
 	public function setNearFar(near:Float, far:Float):Camera {
 		this.near = near;

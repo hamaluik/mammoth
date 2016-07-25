@@ -7,7 +7,8 @@ import kha.Framebuffer;
 import kha.graphics4.Graphics;
 import kha.Scheduler;
 import kha.System;
-import mammoth.lib.RenderSystem;
+import mammoth.systems.RenderSystem;
+import mammoth.systems.TransformSystem;
 import zui.Id;
 import zui.Zui;
 import mammoth.util.Stats;
@@ -17,6 +18,11 @@ class Mammoth {
 	public static var time(get, never):Float;
 	static inline function get_time():Float return Scheduler.time();
 	public static var dt(default, null):Float;
+
+	public static var width(get, never):Int;
+	static inline function get_width():Int return System.windowWidth();
+	public static var height(get, never):Int;
+	static inline function get_height():Int return System.windowHeight();
 
 	// additional events to listen to (outside of the ECS)
 	public static var onRenderStart(default, null):Array<Framebuffer->Void> = new Array<Framebuffer->Void>();
@@ -39,7 +45,7 @@ class Mammoth {
 	private static var _ui:Zui;
 	private static var _showDebug:Bool = false;
 
-	@:allow(mammoth.lib.RenderSystem)
+	@:allow(mammoth.systems.RenderSystem)
 	private static var graphics:Graphics;
 
 	public static function init(
@@ -72,6 +78,7 @@ class Mammoth {
 		renderPhase = engine.createPhase();
 
 		// set up our render system
+		renderPhase.add(new TransformSystem());
 		renderPhase.add(new RenderSystem());
 
 		#if debug

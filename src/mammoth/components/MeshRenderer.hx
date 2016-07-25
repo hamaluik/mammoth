@@ -1,4 +1,4 @@
-package mammoth.lib;
+package mammoth.components;
 
 import edge.IComponent;
 import mammoth.render.Mesh;

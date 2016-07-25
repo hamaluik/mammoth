@@ -1,0 +1,74 @@
+package mammoth.systems;
+
+import edge.ISystem;
+import edge.View;
+import kha.math.FastMatrix4;
+import mammoth.components.Camera;
+import mammoth.components.MeshRenderer;
+import mammoth.components.Transform;
+import mammoth.Mammoth;
+
+class RenderSystem implements ISystem {
+	var objects:View<{ transform:Transform, renderer:MeshRenderer }>;
+
+	public function before() {
+		Mammoth.graphics.begin();
+	}
+
+	public function update(transform:Transform, camera:Camera) {
+		// calculate the camera's matrices
+		if(camera.vDirty || transform.mWasDirty) {
+			camera.v = transform.m.inverse();
+			camera.vDirty = true;
+		}
+		if(camera.pDirty) {
+			var aspect:Float = Mammoth.width / Mammoth.height;
+			camera.p = switch(camera.projection) {
+				case ProjectionMode.Perspective(fov): FastMatrix4.perspectiveProjection(fov, aspect, camera.near, camera.far);
+				case ProjectionMode.Orthographic(halfY): {
+					var halfX:Float = aspect * halfY;
+					FastMatrix4.orthogonalProjection(-halfX, halfX, -halfY, halfY, camera.near, camera.far);
+				}
+			}
+			camera.vp = FastMatrix4.identity().multmat(camera.p).multmat(camera.v);
+		}
+
+		// setup the viewport
+		var vpX:Int = Std.int(camera.viewportMin.x * Mammoth.width);
+		var vpY:Int = Std.int(camera.viewportMin.y * Mammoth.height);
+		var vpW:Int = Std.int((camera.viewportMax.x - camera.viewportMin.x) * Mammoth.width);
+		var vpH:Int = Std.int((camera.viewportMax.y - camera.viewportMin.y) * Mammoth.height);
+		Mammoth.graphics.viewport(vpX, vpY, vpW, vpH);
+		Mammoth.graphics.scissor(vpX, vpY, vpW, vpH);
+		Mammoth.graphics.clear(camera.clearColour);
+
+		for(o in objects) {
+			var object = o.data;
+			// set the MVP
+			if(camera.vDirty || camera.pDirty || object.transform.mWasDirty) {
+				object.renderer.material.setUniform("MVP", Matrix4(
+						FastMatrix4.identity()
+							.multmat(camera.vp)
+							.multmat(object.transform.m)
+					));
+			}
+
+			// set the VP (for shading)
+			if(camera.vDirty || camera.pDirty) object.renderer.material.setUniform("VP", Matrix4(camera.vp));
+			if(camera.vDirty) object.renderer.material.setUniform("V", Matrix4(camera.v));
+			if(camera.pDirty) object.renderer.material.setUniform("P", Matrix4(camera.p));
+
+			// now render!
+			object.renderer.material.apply(Mammoth.graphics);
+			object.renderer.mesh.bindBuffers(Mammoth.graphics);
+			Mammoth.graphics.drawIndexedVertices();
+		}
+
+		camera.vDirty = false;
+		camera.pDirty = false;
+	}
+
+	public function after() {
+		Mammoth.graphics.end();
+	}
+}
