@@ -1,31 +1,52 @@
 package mammoth;
 
+import edge.Engine;
+import edge.Phase;
 import kha.Assets;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.System;
+import mammoth.lib.ModelMatrixSystem;
+import mammoth.lib.CameraSystem;
+import zui.Id;
+import zui.Zui;
 import mammoth.render.Renderer;
+import mammoth.util.Stats;
 
 class Mammoth {
+	// time tools
 	public static var time(get, never):Float;
 	static inline function get_time():Float return Scheduler.time();
 	public static var dt(default, null):Float;
-	public static var fps(default, null):Int;
-	private static var _lastTime:Float;
 
+	// additional events to listen to (outside of the ECS)
 	public static var onRenderStart(default, null):Array<Framebuffer->Void> = new Array<Framebuffer->Void>();
 	public static var onRenderEnd(default, null):Array<Framebuffer->Void> = new Array<Framebuffer->Void>();
 	public static var onUpdateStart(default, null):Array<Float->Void> = new Array<Float->Void>();
 	public static var onUpdateEnd(default, null):Array<Float->Void> = new Array<Float->Void>();
 
+	// parts of our system
+	public static var renderer:Renderer;
+	public static var engine:Engine;
+	public static var updatePhase:Phase;
+	public static var renderPhase:Phase;
+
+	// internal values
+	private static var _updateRate:Float;
+	private static var _lastTime:Float;
 	private static var _uuid:Int = 1;
 
-	private static var renderer:Renderer;
+	// debug tools
+	public static var stats:Stats = new Stats();
+	private static var _ui:Zui;
+	private static var _showDebug:Bool = false;
 
 	public static function init(
 		title:String,
 		width:UInt, height:UInt,
+		?onReady:Void->Void,
 		updateRate:Float=60, loadAllAssets:Bool=true):Void {
+		_updateRate = updateRate;
 		System.init({
 			title: title,
 			width: width,
@@ -34,42 +55,103 @@ class Mammoth {
 		function() {
 			if(loadAllAssets) {
 				Assets.loadEverything(function() {
-					start(updateRate);
+					prepare(onReady);
 				});
 			}
 			else {
-				start(updateRate);
+				prepare(onReady);
 			}
 		});
 	}
 
-	private static function start(updateRate:Float):Void {
-		// todo: initialize input
-
+	private static function prepare(onReady:Void->Void):Void {
 		// initialize our renderer
 		renderer = new Renderer();
 
-		// start our loops!
-		System.notifyOnRender(render);
-		Scheduler.addTimeTask(update, 0, 1 / updateRate);
+		// initialize our ECS
+		engine = new Engine();
+		updatePhase = engine.createPhase();
+		renderPhase = engine.createPhase();
+
+		// set up our render system
+		renderPhase.add(new ModelMatrixSystem());
+		renderPhase.add(new CameraSystem());
+
+		#if debug
+		// initialize our debug UI
+		_ui = new Zui(Assets.fonts.DroidSans);
+
+		// initialize our debug input
+		kha.input.Keyboard.get().notify(function(k:kha.Key, c:String):Void {
+			switch(k) {
+				case kha.Key.CHAR: if(c == '`') _showDebug = !_showDebug;
+				case _: {}
+			}
+		}, null);
+		#end
+
+		if(onReady != null) onReady();
+	}
+
+	public static function start():Void {
 		_lastTime = time;
+		System.notifyOnRender(render);
+		Scheduler.addTimeTask(update, 0, 1 / _updateRate);
 	}
 
 	private static function render(fb:Framebuffer):Void {
+		var start:Float = System.time;
 		for(cb in onRenderStart) cb(fb);
+
+		renderPhase.update(0);
 		renderer.render(fb.g4);
+		stats.drawCalls = renderer.drawCalls;
+
 		for(cb in onRenderEnd) cb(fb);
+		var end:Float = System.time;
+		stats.renderTime = end - start;
+
+		#if debug
+		if(_showDebug) {
+			_ui.begin(fb.g2);
+			if(_ui.window(Id.window(), System.windowWidth() - 150, 0, 150, 200)) {
+					_ui.row([0.5, 0.5]);
+						_ui.text('FPS', Zui.ALIGN_LEFT);
+						_ui.text('${stats.fps}', Zui.ALIGN_RIGHT);
+
+					_ui.row([0.5, 0.5]);
+						_ui.text('Update:', Zui.ALIGN_LEFT);
+						_ui.text('${Math.fround(stats.updateTime*100000) / 100} ms', Zui.ALIGN_RIGHT);
+
+					_ui.row([0.5, 0.5]);
+						_ui.text('Render:', Zui.ALIGN_LEFT);
+						_ui.text('${Math.fround(stats.renderTime*100000) / 100} ms', Zui.ALIGN_RIGHT);
+
+					_ui.row([0.5, 0.5]);
+						_ui.text('Draw calls:', Zui.ALIGN_LEFT);
+						_ui.text('${stats.drawCalls}', Zui.ALIGN_RIGHT);
+			}
+			_ui.end();
+		}
+		#end
 	}
 
 	private static function update():Void {
 		dt = time - _lastTime;
-		fps = Math.floor(1 / dt);
+		_lastTime = time;
+		stats.fps = Math.floor(1 / dt);
 
+		var start:Float = System.time;
 		for(cb in onUpdateStart) cb(dt);
 
-		// todo: update
+		// run the update phase
+		updatePhase.update(dt);
+
+		// todo: fixed-timestep physics phase?
 
 		for(cb in onUpdateEnd) cb(dt);
+		var end:Float = System.time;
+		stats.updateTime = end - start;
 	}
 
 	public static function UUID():Int {

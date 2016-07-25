@@ -8,5 +8,9 @@
   "version": "0.0.0",
   "releasenote": "",
   "contributors": ["FuzzyWuzzie"],
-  "dependencies": {}
+  "dependencies": {
+    "kha": "",
+    "zui": "",
+    "edge": ""
+  }
 }

@@ -1,22 +1,34 @@
 package mammoth.render;
 
+import haxe.ds.IntMap;
 import kha.math.FastMatrix4;
 import kha.graphics4.Graphics;
 import mammoth.render.RenderableMesh;
 import mammoth.render.RenderableCamera;
 
 class Renderer {
-	public var cameras:Array<RenderableCamera> = new Array<RenderableCamera>();
-	public var renderables:Array<RenderableMesh> = new Array<RenderableMesh>();
+	public var drawCalls(default, null):Int = 0;
+	public var culledObjects(default, null):Int = 0;
 
-	public static var drawCalls(default, null):Int = 0;
+	var cameras:IntMap<RenderableCamera> = new IntMap<RenderableCamera>();
+	var renderables:IntMap<RenderableMesh> = new IntMap<RenderableMesh>();
 
 	public function new() {}
 
+	public function camera(id:Int):RenderableCamera {
+		if(!cameras.exists(id)) cameras.set(id, new RenderableCamera());
+		return cameras.get(id);
+	}
+
+	public function removeCamera(id:Int) {
+		cameras.remove(id);
+	}
+
 	private function preProcess() {
-		// TODO: caching
+		// TODO: caching!
 		// set transformation uniforms
 		for(camera in cameras) {
+			// set the transformations
 			for(renderable in renderables) {
 				// calculate the MVP for this camera-object
 				renderable.material.setUniform("MVP",
@@ -26,11 +38,18 @@ class Renderer {
 						.multmat(renderable.model)));
 
 				// set the render uniforms
-				renderable.material.setUniform("VP", Matrix4(camera.viewProjection));
+				if(camera.pDirty || camera.vDirty)
+					renderable.material.setUniform("VP", Matrix4(camera.viewProjection));
+				// todo: model dirty
 				renderable.material.setUniform("M", Matrix4(renderable.model));
-				renderable.material.setUniform("V", Matrix4(camera.view));
-				renderable.material.setUniform("P", Matrix4(camera.projection));
+				if(camera.vDirty)
+					renderable.material.setUniform("V", Matrix4(camera.view));
+				if(camera.pDirty)
+					renderable.material.setUniform("P", Matrix4(camera.projection));
 			}
+
+			camera.vDirty = false;
+			camera.pDirty = false;
 		}
 	}
 
@@ -40,6 +59,16 @@ class Renderer {
 
 		g.begin();
 		for(camera in cameras) {
+			// set the viewport
+			g.viewport(
+				Std.int(camera.viewportMin.x), Std.int(camera.viewportMin.y),
+				Std.int(camera.viewportSize.x), Std.int(camera.viewportSize.y));
+
+			// clear it!
+			g.clear(camera.clearColour);
+
+			// render everything
+			// todo: cull!
 			for(renderable in renderables) {
 				renderable.material.apply(g);
 				renderable.mesh.bindBuffers(g); 

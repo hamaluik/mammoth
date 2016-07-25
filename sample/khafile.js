@@ -8,9 +8,10 @@ project.windowOptions = {
 project.addSources('src');
 
 project.addLibrary("mammoth");
+project.addLibrary("edge");
 
-/*project.addShaders('src/shaders/**');
-project.addAssets('assets/**');*/
+//project.addShaders('src/shaders/**');
+project.addAssets('assets/**');
 
 project.addDefine('debug');
 project.addDefine('source-map-content');
