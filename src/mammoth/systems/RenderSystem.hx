@@ -9,10 +9,37 @@ import mammoth.components.Transform;
 import mammoth.Mammoth;
 
 class RenderSystem implements ISystem {
+	var transforms:View<{ transform:Transform }>;
 	var objects:View<{ transform:Transform, renderer:MeshRenderer }>;
 
 	public function before() {
+		// calculate the model matrices for all tranforms
+		for(t in transforms) {
+			calculateModelMatrix(t.data.transform);
+		}
+
 		Mammoth.graphics.begin();
+	}
+
+	private function calculateModelMatrix(t:Transform) {
+		// early exit
+		t.mWasDirty = false;
+		if(!t.mDirty) return;
+
+		// calculate the affine transformation matrix
+		var translation:FastMatrix4 = FastMatrix4.translation(t.localPosition.x, t.localPosition.y, t.localPosition.z);
+		var rotation:FastMatrix4 = FastMatrix4.fromMatrix4(t.localRotation.matrix());
+		var scale:FastMatrix4 = FastMatrix4.scale(t.localScale.x, t.localScale.y, t.localScale.z);
+		var m:FastMatrix4 = translation.multmat(rotation).multmat(scale);
+
+		// apply its parent transform
+		if(t.parent != null) {
+			m = FastMatrix4.identity().multmat(t.parent.m).multmat(m);
+		}
+
+		t.m = m;
+		t.mDirty = false;
+		t.mWasDirty = true;
 	}
 
 	public function update(transform:Transform, camera:Camera) {
@@ -55,6 +82,7 @@ class RenderSystem implements ISystem {
 
 			// set the VP (for shading)
 			if(camera.vDirty || camera.pDirty) object.renderer.material.setUniform("VP", Matrix4(camera.vp));
+			if(object.transform.mWasDirty) object.renderer.material.setUniform("M", Matrix4(object.transform.m));
 			if(camera.vDirty) object.renderer.material.setUniform("V", Matrix4(camera.v));
 			if(camera.pDirty) object.renderer.material.setUniform("P", Matrix4(camera.p));
 

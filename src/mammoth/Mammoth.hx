@@ -8,7 +8,6 @@ import kha.graphics4.Graphics;
 import kha.Scheduler;
 import kha.System;
 import mammoth.systems.RenderSystem;
-import mammoth.systems.TransformSystem;
 import zui.Id;
 import zui.Zui;
 import mammoth.util.Stats;
@@ -78,7 +77,6 @@ class Mammoth {
 		renderPhase = engine.createPhase();
 
 		// set up our render system
-		renderPhase.add(new TransformSystem());
 		renderPhase.add(new RenderSystem());
 
 		#if debug

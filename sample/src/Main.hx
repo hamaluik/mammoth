@@ -5,8 +5,11 @@ import kha.math.FastVector2;
 import kha.math.Quaternion;
 import kha.math.Vector3;
 import mammoth.components.Camera;
+import mammoth.components.MeshRenderer;
 import mammoth.components.Transform;
+import mammoth.defaults.Materials;
 import mammoth.Mammoth;
+import mammoth.defaults.Primitives;
 
 class Main {
 	public static function main() {
@@ -24,6 +27,17 @@ class Main {
 				.setProjection(ProjectionMode.Perspective(60))
 				.setViewport(new FastVector2(0, 0), new FastVector2(1, 1))
 				.setClearColour(Color.fromFloats(0.25, 0.25, 0.25))
+		]);
+
+		// create a cube
+		Mammoth.engine.create([
+			new Transform()
+				.setLocalPosition(0, 0, 0)
+				.setLocalRotation(new Quaternion(0, 0, 0, 1))
+				.setLocalScale(1, 1, 1),
+			new MeshRenderer()
+				.setMesh(Primitives.cube())
+				.setMaterial(Materials.unlitColour())
 		]);
 
 		Mammoth.start();

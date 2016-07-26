@@ -28,7 +28,7 @@ class Transform implements IComponent {
 	public var mWasDirty:Bool = false;
 	public var m:FastMatrix4 = FastMatrix4.identity();
 
-	public function new(?pos:FastVector3, ?rot:FastMatrix4, ?scale:FastVector3, ?parent:Transform) {
+	public function new(?pos:FastVector3, ?rot:Quaternion, ?scale:FastVector3, ?parent:Transform) {
 		if(pos != null) localPosition = pos;
 		if(rot != null) localRotation = rot;
 		if(scale != null) localScale = scale;
