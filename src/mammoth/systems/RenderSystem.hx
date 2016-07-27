@@ -3,13 +3,17 @@ package mammoth.systems;
 import edge.ISystem;
 import edge.View;
 import kha.math.FastMatrix4;
+import kha.math.FastVector4;
 import mammoth.components.Camera;
+import mammoth.components.Light;
 import mammoth.components.MeshRenderer;
 import mammoth.components.Transform;
 import mammoth.Mammoth;
+import mammoth.render.Material;
 
 class RenderSystem implements ISystem {
 	var transforms:View<{ transform:Transform }>;
+	var lights:View<{ transform:Transform, light:Light }>;
 	var objects:View<{ transform:Transform, renderer:MeshRenderer }>;
 
 	public function before() {
@@ -51,7 +55,7 @@ class RenderSystem implements ISystem {
 		if(camera.pDirty) {
 			var aspect:Float = Mammoth.width / Mammoth.height;
 			camera.p = switch(camera.projection) {
-				case ProjectionMode.Perspective(fov): FastMatrix4.perspectiveProjection(fov, aspect, camera.near, camera.far);
+				case ProjectionMode.Perspective(fov): FastMatrix4.perspectiveProjection(fov * Math.PI / 180, aspect, camera.near, camera.far);
 				case ProjectionMode.Orthographic(halfY): {
 					var halfX:Float = aspect * halfY;
 					FastMatrix4.orthogonalProjection(-halfX, halfX, -halfY, halfY, camera.near, camera.far);
@@ -71,23 +75,42 @@ class RenderSystem implements ISystem {
 
 		for(o in objects) {
 			var object = o.data;
+			var material:Material = object.renderer.material;
 			// set the MVP
 			if(camera.vDirty || camera.pDirty || object.transform.mWasDirty) {
-				object.renderer.material.setUniform("MVP", Matrix4(
-						FastMatrix4.identity()
-							.multmat(camera.vp)
-							.multmat(object.transform.m)
-					));
+				material.setUniform("MVP", Matrix4(FastMatrix4.identity()
+					.multmat(camera.vp)
+					.multmat(object.transform.m)));
 			}
 
 			// set the VP (for shading)
-			if(camera.vDirty || camera.pDirty) object.renderer.material.setUniform("VP", Matrix4(camera.vp));
-			if(object.transform.mWasDirty) object.renderer.material.setUniform("M", Matrix4(object.transform.m));
-			if(camera.vDirty) object.renderer.material.setUniform("V", Matrix4(camera.v));
-			if(camera.pDirty) object.renderer.material.setUniform("P", Matrix4(camera.p));
+			if(camera.vDirty || camera.pDirty) material.setUniform("VP", Matrix4(camera.vp));
+			if(object.transform.mWasDirty) material.setUniform("M", Matrix4(object.transform.m));
+			if(camera.vDirty) material.setUniform("V", Matrix4(camera.v));
+			if(camera.pDirty) material.setUniform("P", Matrix4(camera.p));
+
+			// set light data
+			var lightIndex:Int = 0;
+			for(l in lights) {
+				var light:Light = l.data.light;
+
+				// set the uniforms
+				switch(light.type) {
+					case LightType.Directional: {
+						// calculate the light direction
+						var lightDir:FastVector4 = l.data.transform.m.multvec(new FastVector4(0, 0, 1, 0));
+						
+						material.setUniform('DirLights[${lightIndex}].dir', Float3(lightDir.x, lightDir.y, lightDir.z));
+						material.setUniform('DirLights[${lightIndex}].col', RGB(light.colour));
+					}
+				}
+
+				// move on
+				lightIndex++;
+			}
 
 			// now render!
-			object.renderer.material.apply(Mammoth.graphics);
+			material.apply(Mammoth.graphics);
 			object.renderer.mesh.bindBuffers(Mammoth.graphics);
 			Mammoth.graphics.drawIndexedVertices();
 		}

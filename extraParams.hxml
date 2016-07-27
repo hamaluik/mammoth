@@ -1,2 +1,4 @@
 -resource C:\Users\Kenton\Projects\mammoth\src\assets\shaders\unlitColoured.vert.glsl@unlitColoured.vert.glsl
 -resource C:\Users\Kenton\Projects\mammoth\src\assets\shaders\unlitColoured.frag.glsl@unlitColoured.frag.glsl
+-resource C:\Users\Kenton\Projects\mammoth\src\assets\shaders\diffuse.vert.glsl@diffuse.vert.glsl
+-resource C:\Users\Kenton\Projects\mammoth\src\assets\shaders\diffuse.frag.glsl@diffuse.frag.glsl

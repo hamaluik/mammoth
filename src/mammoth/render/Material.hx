@@ -8,6 +8,7 @@ import kha.graphics4.Graphics;
 import kha.graphics4.PipelineState;
 import kha.graphics4.VertexShader;
 import kha.graphics4.VertexStructure;
+import mammoth.render.TUniform;
 
 class Material {
 	public var name(default, null):String;
@@ -33,8 +34,7 @@ class Material {
 
 	public function setUniform(name:String, value:TUniform) {
 		if(uniforms.exists(name)) {
-			var uniform:Uniform = uniforms.get(name);
-			uniform.value = value;
+			uniforms.get(name).value = value;
 		}
 		else {
 			var uniform:Uniform = new Uniform();
@@ -42,6 +42,7 @@ class Material {
 			uniforms.set(name, uniform);
 			_bound = false;
 		}
+		if(!uniforms.get(name).bound) uniforms.get(name).location = pipeline.getConstantLocation(name);
 	}
 
 	public function bindUniforms() {
