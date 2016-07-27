@@ -73,6 +73,7 @@ class RenderSystem implements ISystem {
 		Mammoth.graphics.scissor(vpX, vpY, vpW, vpH);
 		Mammoth.graphics.clear(camera.clearColour);
 
+		Mammoth.stats.drawCalls = 0;
 		for(o in objects) {
 			var object = o.data;
 			var material:Material = object.renderer.material;
@@ -113,6 +114,7 @@ class RenderSystem implements ISystem {
 			material.apply(Mammoth.graphics);
 			object.renderer.mesh.bindBuffers(Mammoth.graphics);
 			Mammoth.graphics.drawIndexedVertices();
+			Mammoth.stats.drawCalls++;
 		}
 
 		camera.vDirty = false;
