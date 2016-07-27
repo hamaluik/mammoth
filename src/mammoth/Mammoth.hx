@@ -7,6 +7,7 @@ import kha.Framebuffer;
 import kha.graphics4.Graphics;
 import kha.Scheduler;
 import kha.System;
+import mammoth.defaults.Fonts;
 import mammoth.systems.RenderSystem;
 import zui.Id;
 import zui.Zui;
@@ -81,7 +82,7 @@ class Mammoth {
 
 		#if debug
 		// initialize our debug UI
-		_ui = new Zui(Assets.fonts.DroidSans);
+		_ui = new Zui(Fonts.DroidSans());
 
 		// initialize our debug input
 		kha.input.Keyboard.get().notify(function(k:kha.Key, c:String):Void {

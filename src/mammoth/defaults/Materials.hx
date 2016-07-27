@@ -16,8 +16,8 @@ class Materials {
 	public static function unlitColour(?colour:Color):Material {
 		if(colour == null) colour = Color.White;
 
-		var vertSource:Bytes = Resource.getBytes("unlitColoured.vert.glsl");
-		var fragSource:Bytes = Resource.getBytes("unlitColoured.frag.glsl");
+		var vertSource:Bytes = Resource.getBytes("shader/unlitColoured.vert.glsl");
+		var fragSource:Bytes = Resource.getBytes("shader/unlitColoured.frag.glsl");
 
 		var vert:VertexShader = new VertexShader(Blob.fromBytes(vertSource), "unlitColoured.vert.glsl");
 		var frag:FragmentShader = new FragmentShader(Blob.fromBytes(fragSource), "unlitColoured.vert.glsl");
@@ -35,8 +35,8 @@ class Materials {
 		if(colour == null) colour = Color.White;
 		if(ambient == null) ambient = Color.fromFloats(0.1, 0.1, 0.1);
 
-		var vertSource:Bytes = Resource.getBytes("diffuse.vert.glsl");
-		var fragSource:Bytes = Resource.getBytes("diffuse.frag.glsl");
+		var vertSource:Bytes = Resource.getBytes("shader/diffuse.vert.glsl");
+		var fragSource:Bytes = Resource.getBytes("shader/diffuse.frag.glsl");
 
 		var vert:VertexShader = new VertexShader(Blob.fromBytes(vertSource), "diffuse.vert.glsl");
 		var frag:FragmentShader = new FragmentShader(Blob.fromBytes(fragSource), "diffuse.vert.glsl");
