@@ -2,6 +2,7 @@ package mammoth.render;
 
 import haxe.ds.Vector;
 import kha.FastFloat;
+import kha.Image;
 import kha.math.FastMatrix4;
 import kha.math.FastVector2;
 import kha.math.FastVector3;
@@ -22,4 +23,5 @@ enum TUniform {
 	Matrix4(v:FastMatrix4);
 	RGB(c:Color);
 	RGBA(c:Color);
+	Texture2D(t:Image);
 }

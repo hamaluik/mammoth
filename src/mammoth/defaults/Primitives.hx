@@ -6,9 +6,9 @@ import mammoth.render.Mesh;
 import mammoth.render.VertexDataDescription;
 
 class Primitives {
-	public static function cube():Mesh {
+	public static function cube(position:Bool=true, normal:Bool=true, uv:Bool=true):Mesh {
 		var m = new Mesh();
-		m.vertexData.push(
+		if(position) m.vertexData.push(
 			new VertexDataDescription("position", [
 				 0.5,  0.5, -0.5,
 				 0.5, -0.5, -0.5,
@@ -37,7 +37,7 @@ class Primitives {
 			])
 			.addStructure("pos", VertexData.Float3)
 			.setUsage(Usage.StaticUsage));
-		m.vertexData.push(
+		if(normal) m.vertexData.push(
 			new VertexDataDescription("normal", [
 				 0.0,  0.0, -1.0,
 				 0.0,  0.0, -1.0,
@@ -66,7 +66,7 @@ class Primitives {
 			])
 			.addStructure("norm", VertexData.Float3)
 			.setUsage(Usage.StaticUsage));
-		m.vertexData.push(
+		if(uv) m.vertexData.push(
 			new VertexDataDescription("uv", [
 				1.0, 1.0,
 				1.0, 0.0,

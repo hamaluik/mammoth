@@ -22,10 +22,13 @@ class Materials {
 		var vert:VertexShader = new VertexShader(Blob.fromBytes(vertSource), "unlitColoured.vert.glsl");
 		var frag:FragmentShader = new FragmentShader(Blob.fromBytes(fragSource), "unlitColoured.vert.glsl");
 
-		var structure:VertexStructure = new VertexStructure();
-		structure.add("pos", VertexData.Float3);
+		var posStructure:VertexStructure = new VertexStructure();
+		posStructure.add("pos", VertexData.Float3);
 
-		var m:Material = new Material("unlitColoured", [structure], vert, frag);
+		var uvStructure:VertexStructure = new VertexStructure();
+		uvStructure.add("uv", VertexData.Float2);
+
+		var m:Material = new Material("unlitColoured", [posStructure, uvStructure], vert, frag);
 		m.setUniform("colour", TUniform.Float3(colour.R, colour.G, colour.B));
 
 		return m;
@@ -47,7 +50,10 @@ class Materials {
 		var normStructure:VertexStructure = new VertexStructure();
 		normStructure.add("norm", VertexData.Float3);
 
-		var m:Material = new Material("diffuse", [posStructure, normStructure], vert, frag);
+		var uvStructure:VertexStructure = new VertexStructure();
+		uvStructure.add("uv", VertexData.Float2);
+
+		var m:Material = new Material("diffuse", [posStructure, normStructure, uvStructure], vert, frag);
 		m.setUniform("diffuseColour", TUniform.Float3(colour.R, colour.G, colour.B));
 		m.setUniform("ambientColour", TUniform.Float3(ambient.R, ambient.G, ambient.B));
 

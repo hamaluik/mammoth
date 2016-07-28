@@ -9,8 +9,10 @@ import mammoth.components.Light;
 import mammoth.components.MeshRenderer;
 import mammoth.components.Transform;
 import mammoth.defaults.Materials;
+import mammoth.defaults.Textures;
 import mammoth.Mammoth;
 import mammoth.defaults.Primitives;
+import mammoth.render.TUniform;
 
 class Main {
 	public static function main() {
@@ -37,8 +39,9 @@ class Main {
 				.setLocalRotation(new Quaternion(0, 0, 0.383734, 0.9234437))
 				.setLocalScale(1, 1, 1),
 			new MeshRenderer()
-				.setMesh(Primitives.cube())
-				.setMaterial(Materials.diffuse())
+				.setMesh(Primitives.cube(true, false, true))
+				.setMaterial(Materials.unlitColour()
+					.setUniform("text", TUniform.Texture2D(Textures.UVGrid())))
 		]);
 
 		// and a light!

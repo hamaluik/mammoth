@@ -4,7 +4,11 @@ precision mediump float;
 
 // material uniforms
 uniform vec3 colour;
+uniform sampler2D tex;
+
+// vertex shader outputs
+varying vec2 v_uv;
 
 void main() {
-	gl_FragColor = vec4(colour, 1.0);
+	gl_FragColor = texture2D(tex, v_uv) * vec4(colour, 1.0);
 }
