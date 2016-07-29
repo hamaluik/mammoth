@@ -39,8 +39,8 @@ class Main {
 				.setLocalRotation(new Quaternion(0, 0, 0.383734, 0.9234437))
 				.setLocalScale(1, 1, 1),
 			new MeshRenderer()
-				.setMesh(Primitives.cube(true, false, true))
-				.setMaterial(Materials.unlitColour()
+				.setMesh(Primitives.cube(true, true, true))
+				.setMaterial(Materials.diffuse()
 					.setUniform("text", TUniform.Texture2D(Textures.UVGrid())))
 		]);
 

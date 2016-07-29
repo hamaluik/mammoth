@@ -5,6 +5,7 @@ precision mediump float;
 // inputs
 attribute vec3 pos;
 attribute vec3 norm;
+attribute vec2 uv;
 
 // camera uniforms
 uniform mat4 MVP;
@@ -23,6 +24,7 @@ uniform vec3 ambientColour;
 
 // outputs
 varying vec3 colour;
+varying vec2 v_uv;
 
 void main() {
 	// set the camera-space position of the vertex
@@ -39,4 +41,7 @@ void main() {
 
 	// add some ambient
 	colour += diffuseColour * ambientColour;
+
+	// interpolate the UV
+	v_uv = uv;
 }
