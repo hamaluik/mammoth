@@ -52,8 +52,9 @@ vec3 specular(vec3 lightDir, vec3 norm, vec3 viewDir, vec3 texSpecular) {
 
 float attenuation(vec3 lightPos, vec3 fragPos, float lightDistance) {
 	float dist = length(lightPos - fragPos);
-    float attenuation = clamp(1.0 - dist * dist / (lightDistance * lightDistance), 0.0, 1.0);
-    return (attenuation * attenuation);
+    /*float attenuation = clamp(1.0 - dist * dist / (lightDistance * lightDistance), 0.0, 1.0);
+    return (attenuation * attenuation);*/
+    return 1.0 / dist;
 }
 
 vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir, vec3 texDiffuse, vec3 texSpecular) {
@@ -82,11 +83,13 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec3 
     return (diff + spec) * att * intensity;
 }
 
+const float gamma = 2.2;
+
 void main() {
 	vec3 viewDir = normalize(viewPos - v_fragPos);
 
-	vec3 texDiffuse = texture2D(materialDiffuse, v_uv).rgb;
-	vec3 texSpecular = texture2D(materialSpecular, v_uv).rgb;
+	vec3 texDiffuse = pow(texture2D(materialDiffuse, v_uv).rgb, vec3(gamma));
+	vec3 texSpecular = pow(texture2D(materialSpecular, v_uv).rgb, vec3(gamma));
 
 	vec3 result = ambientLight * texDiffuse;
 	for(int i = 0; i < NUM_DIR_LIGHTS; i++) {

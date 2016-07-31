@@ -23,5 +23,5 @@ enum TUniform {
 	Matrix4(v:FastMatrix4);
 	RGB(c:Color);
 	RGBA(c:Color);
-	Texture2D(t:Image);
+	Texture2D(t:Image, slot:Int);
 }

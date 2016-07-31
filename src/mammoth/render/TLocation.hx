@@ -4,6 +4,6 @@ import kha.graphics4.ConstantLocation;
 import kha.graphics4.TextureUnit;
 
 enum TLocation {
-	Uniform(l:ConstantLocation);
-	Texture(l:TextureUnit);
+	Uniform(location:ConstantLocation);
+	Texture(location:ConstantLocation, unit:TextureUnit);
 }

@@ -41,10 +41,8 @@ class Main {
 		var mat:Material = Materials.blinnPhong()
 			// TODO: clean up this texture business
 			.setUniform("materialShininess", TUniform.Float(32))
-			.setUniform("materialDiffuse", TUniform.Int(0))
-			.setUniform("materialSpecular", TUniform.Int(1))
-			.setUniform("materialDiffuse", TUniform.Texture2D(Assets.images.container_d))
-			.setUniform("materialSpecular", TUniform.Texture2D(Assets.images.container_s));
+			.setUniform("materialDiffuse", TUniform.Texture2D(Assets.images.container_d, 0))
+			.setUniform("materialSpecular", TUniform.Texture2D(Assets.images.container_s, 1));
 
 		// create a cube
 		Mammoth.engine.create([
@@ -68,13 +66,13 @@ class Main {
 		]);
 
 		// a sun
-		/*Mammoth.engine.create([
+		Mammoth.engine.create([
 			new Transform()
 				.setLocalPosition(0, 0, 3.5)
 				.setLocalRotation(new Quaternion(0.2128308, 0.4044054, 0.0346047, 0.888798))
 				.setLocalScale(1, 1, 1),
 			new DirectionLight()
-				.setColour(Color.White)
+				.setColour(Color.fromFloats(0.5, 0.5, 0.5))
 		]);
 
 		// and a point light
@@ -82,9 +80,9 @@ class Main {
 			new Transform()
 				.setLocalPosition(-0.9209661, -0.9100119, 1.174525),
 			new PointLight()
-				.setColour(Color.fromFloats(0.25, 0.25, 0.25))
-				.setDistance(25)
-		]);*/
+				.setColour(Color.fromFloats(0.75, 0.75, 0.75))
+				.setDistance(3)
+		]);
 
 		// and a spotlight
 		Mammoth.engine.create([

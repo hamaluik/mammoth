@@ -2,6 +2,10 @@ package mammoth.systems;
 
 import edge.ISystem;
 import edge.View;
+import kha.graphics4.DepthStencilFormat;
+import kha.graphics4.Graphics;
+import kha.graphics4.TextureFormat;
+import kha.Image;
 import kha.math.FastMatrix4;
 import kha.math.FastVector4;
 import mammoth.components.Camera;
@@ -10,8 +14,11 @@ import mammoth.components.PointLight;
 import mammoth.components.MeshRenderer;
 import mammoth.components.SpotLight;
 import mammoth.components.Transform;
+import mammoth.defaults.Materials;
+import mammoth.defaults.Primitives;
 import mammoth.Mammoth;
 import mammoth.render.Material;
+import mammoth.render.Mesh;
 import mammoth.render.TUniform;
 
 class RenderSystem implements ISystem {
@@ -21,13 +28,29 @@ class RenderSystem implements ISystem {
 	var spotLights:View<{ transform:Transform, light:SpotLight }>;
 	var objects:View<{ transform:Transform, renderer:MeshRenderer }>;
 
+	var graphics:Graphics;
+	var renderImage:Image;
+	var screenMesh:Mesh;
+	var gammaCorrection:Material;
+
+	public function new() {
+		renderImage = Image.createRenderTarget(
+			Mammoth.width, Mammoth.height,
+			TextureFormat.RGBA32, DepthStencilFormat.Depth24Stencil8,
+			1);
+		screenMesh = Primitives.screen();
+		gammaCorrection = Materials.gammaCorrection();
+	}
+
 	public function before() {
 		// calculate the model matrices for all tranforms
 		for(t in transforms) {
 			calculateModelMatrix(t.data.transform);
 		}
 
-		Mammoth.graphics.begin();
+		//graphics = Mammoth.frameBuffer.g4;
+		graphics = renderImage.g4;
+		graphics.begin();
 	}
 
 	private function calculateModelMatrix(t:Transform) {
@@ -70,13 +93,14 @@ class RenderSystem implements ISystem {
 		}
 
 		// setup the viewport
-		var vpX:Int = Std.int(camera.viewportMin.x * Mammoth.width);
+		/*var vpX:Int = Std.int(camera.viewportMin.x * Mammoth.width);
 		var vpY:Int = Std.int(camera.viewportMin.y * Mammoth.height);
 		var vpW:Int = Std.int((camera.viewportMax.x - camera.viewportMin.x) * Mammoth.width);
 		var vpH:Int = Std.int((camera.viewportMax.y - camera.viewportMin.y) * Mammoth.height);
-		Mammoth.graphics.viewport(vpX, vpY, vpW, vpH);
-		Mammoth.graphics.scissor(vpX, vpY, vpW, vpH);
-		Mammoth.graphics.clear(camera.clearColour);
+		graphics.viewport(vpX, vpY, vpW, vpH);
+		graphics.scissor(vpX, vpY, vpW, vpH);*/
+		//graphics.clear(camera.clearColour); // TODO: component-defined clearing
+		graphics.clear();
 
 		Mammoth.stats.drawCalls = 0;
 		for(o in objects) {
@@ -128,9 +152,9 @@ class RenderSystem implements ISystem {
 			}
 
 			// now render!
-			material.apply(Mammoth.graphics);
-			object.renderer.mesh.bindBuffers(Mammoth.graphics);
-			Mammoth.graphics.drawIndexedVertices();
+			material.apply(graphics);
+			object.renderer.mesh.bindBuffers(graphics);
+			graphics.drawIndexedVertices();
 			Mammoth.stats.drawCalls++;
 		}
 
@@ -139,6 +163,19 @@ class RenderSystem implements ISystem {
 	}
 
 	public function after() {
-		Mammoth.graphics.end();
+		graphics.end();
+
+		// start applying post-effects
+		Mammoth.frameBuffer.g4.begin();
+
+		// gamma correction
+		gammaCorrection.setUniform("screenSize", TUniform.Float2(Mammoth.width, Mammoth.height));
+		gammaCorrection.setUniform("scene", TUniform.Texture2D(renderImage, 0));
+		gammaCorrection.apply(Mammoth.frameBuffer.g4);
+		screenMesh.bindBuffers(Mammoth.frameBuffer.g4);
+		Mammoth.frameBuffer.g4.drawIndexedVertices();
+
+		// stop applying post-effects
+		Mammoth.frameBuffer.g4.end();
 	}
 }

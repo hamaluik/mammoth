@@ -49,7 +49,7 @@ class Material {
 			if(uniform.bound) continue;
 
 			uniform.location = switch(uniform.value) {
-				case Texture2D(_): TLocation.Texture(pipeline.getTextureUnit(name));
+				case Texture2D(_): TLocation.Texture(pipeline.getConstantLocation(name), pipeline.getTextureUnit(name));
 				case _: TLocation.Uniform(pipeline.getConstantLocation(name));
 			}
 			uniform.bound = true;
@@ -80,9 +80,12 @@ class Material {
 						case _: throw 'Unhandled uniform type ${uniform.value}!';
 					}
 				}
-				case Texture(location): {
+				case Texture(location, unit): {
 					switch(uniform.value) {
-						case Texture2D(t): g.setTexture(location, t);
+						case Texture2D(t, slot): {
+							g.setInt(location, slot);
+							g.setTexture(unit, t);
+						}
 						case _: throw 'Unhandled texture type ${uniform.value}!';
 					}
 				}

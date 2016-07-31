@@ -6,6 +6,21 @@ import mammoth.render.Mesh;
 import mammoth.render.VertexDataDescription;
 
 class Primitives {
+	public static function screen():Mesh {
+		var m = new Mesh();
+		m.vertexData.push(new VertexDataDescription("position", [
+			-1.0, -1.0,
+			 1.0, -1.0,
+			 1.0,  1.0,
+			-1.0,  1.0,
+			])
+			.addStructure("pos", VertexData.Float2)
+			.setUsage(Usage.StaticUsage));
+		m.indexData = [0, 1, 2, 0, 2, 3];
+		m.buildBuffers();
+		return m;
+	}
+
 	public static function cube(position:Bool=true, normal:Bool=true, uv:Bool=true):Mesh {
 		var m = new Mesh();
 		if(position) m.vertexData.push(

@@ -46,7 +46,7 @@ class Mammoth {
 	private static var _showDebug:Bool = false;
 
 	@:allow(mammoth.systems.RenderSystem)
-	private static var graphics:Graphics;
+	private static var frameBuffer:Framebuffer;
 
 	public static function init(
 		title:String,
@@ -106,7 +106,7 @@ class Mammoth {
 		var start:Float = System.time;
 		for(cb in onRenderStart) cb(fb);
 
-		graphics = fb.g4;
+		frameBuffer = fb;
 		renderPhase.update(0);
 
 		for(cb in onRenderEnd) cb(fb);
