@@ -94,7 +94,7 @@ class Main {
 			new SpotLight()
 				.setColour(Color.White)
 				.setDistance(2)
-				.setCutOffs(40, 50)
+				.setAngle(45, 0.15)
 		]);
 
 		Mammoth.start();

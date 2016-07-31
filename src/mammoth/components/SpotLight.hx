@@ -21,9 +21,10 @@ class SpotLight implements IComponent {
 		return this;
 	}
 
-	public function setCutOffs(innerDeg:Float, outerDeg:Float):SpotLight {
-		this.cutOff = innerDeg * Math.PI / 180;
-		this.outerCutOff = outerDeg * Math.PI / 180;
+	public function setAngle(angle:Float, blend:Float):SpotLight {
+		var da:Float = (blend * angle) / 2.0;
+		this.cutOff = (angle + da) * Math.PI / 180;
+		this.outerCutOff = (angle - da) * Math.PI / 180;
 		return this;
 	}
 }
