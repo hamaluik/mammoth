@@ -59,4 +59,28 @@ class Materials {
 
 		return m;
 	}
+
+	public static function blinnPhong(?ambient:Color):Material {
+		if(ambient == null) ambient = Color.fromFloats(0.1, 0.1, 0.1);
+
+		var vertSource:Bytes = Resource.getBytes("shader/blinnphong.vert.glsl");
+		var fragSource:Bytes = Resource.getBytes("shader/blinnphong.frag.glsl");
+
+		var vert:VertexShader = new VertexShader(Blob.fromBytes(vertSource), "diffuse.vert.glsl");
+		var frag:FragmentShader = new FragmentShader(Blob.fromBytes(fragSource), "diffuse.vert.glsl");
+
+		var posStructure:VertexStructure = new VertexStructure();
+		posStructure.add("pos", VertexData.Float3);
+
+		var normStructure:VertexStructure = new VertexStructure();
+		normStructure.add("norm", VertexData.Float3);
+
+		var uvStructure:VertexStructure = new VertexStructure();
+		uvStructure.add("uv", VertexData.Float2);
+
+		var m:Material = new Material("blinnPhong", [posStructure, normStructure, uvStructure], vert, frag);
+		m.setUniform("ambientLight", TUniform.Float3(ambient.R, ambient.G, ambient.B));
+
+		return m;
+	}
 }

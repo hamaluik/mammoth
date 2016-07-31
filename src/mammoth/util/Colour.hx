@@ -1,25 +1,9 @@
-package mammoth.components;
+package mammoth.util;
 
-import edge.IComponent;
 import kha.Color;
 
-enum LightType {
-	Directional;
-}
-
-class Light implements IComponent {
-	public var colour:Color = Color.White;
-	public var type:LightType = LightType.Directional;
-
-	public function new() {}
-
-	public function setColour(colour:Color):Light {
-		this.colour = colour;
-		return this;
-	}
-
-	// from http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
-	public function setTemperature(temperature:Float):Light {
+class Colour {
+	public static function tempToColour(temperature:Float):Color {
 		function clamp(x:Float, min:Float, max:Float):Float {
 			if(x < min) return min;
 			if(x > max) return max;
@@ -55,12 +39,6 @@ class Light implements IComponent {
 		}
 		var b:Float = clamp(blue, 0, 255) / 255;
 
-		this.colour = Color.fromFloats(r, g, b, 1);
-		return this;
-	}
-
-	public function setType(type:LightType):Light {
-		this.type = type;
-		return this;
+		return Color.fromFloats(r, g, b, 1);
 	}
 }

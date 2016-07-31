@@ -99,4 +99,38 @@ class Primitives {
 		m.buildBuffers();
 		return m;
 	}
+
+	public static function plane(position:Bool=true, normal:Bool=true, uv:Bool=true):Mesh {
+		var m = new Mesh();
+		if(position) m.vertexData.push(
+			new VertexDataDescription("position", [
+				-0.5, -0.5, 0.0,
+				 0.5, -0.5, 0.0,
+				 0.5,  0.5, 0.0,
+				-0.5,  0.5, 0.0
+			])
+			.addStructure("pos", VertexData.Float3)
+			.setUsage(Usage.StaticUsage));
+		if(normal) m.vertexData.push(
+			new VertexDataDescription("normal", [
+				 0.0, 0.0, 1.0,
+				 0.0, 0.0, 1.0,
+				 0.0, 0.0, 1.0,
+				 0.0, 0.0, 1.0,
+			])
+			.addStructure("norm", VertexData.Float3)
+			.setUsage(Usage.StaticUsage));
+		if(uv) m.vertexData.push(
+			new VertexDataDescription("uv", [
+				0.0, 0.0,
+				1.0, 0.0,
+				1.0, 1.0,
+				0.0, 1.0
+			])
+			.addStructure("uv", VertexData.Float2)
+			.setUsage(Usage.StaticUsage));
+		m.indexData = [0, 1, 2, 0, 2, 3];
+		m.buildBuffers();
+		return m;
+	}
 }

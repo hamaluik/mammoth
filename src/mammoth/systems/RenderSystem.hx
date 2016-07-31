@@ -5,15 +5,20 @@ import edge.View;
 import kha.math.FastMatrix4;
 import kha.math.FastVector4;
 import mammoth.components.Camera;
-import mammoth.components.Light;
+import mammoth.components.DirectionLight;
+import mammoth.components.PointLight;
 import mammoth.components.MeshRenderer;
+import mammoth.components.SpotLight;
 import mammoth.components.Transform;
 import mammoth.Mammoth;
 import mammoth.render.Material;
+import mammoth.render.TUniform;
 
 class RenderSystem implements ISystem {
 	var transforms:View<{ transform:Transform }>;
-	var lights:View<{ transform:Transform, light:Light }>;
+	var dirLights:View<{ transform:Transform, light:DirectionLight }>;
+	var pointLights:View<{ transform:Transform, light:PointLight }>;
+	var spotLights:View<{ transform:Transform, light:SpotLight }>;
 	var objects:View<{ transform:Transform, renderer:MeshRenderer }>;
 
 	public function before() {
@@ -78,36 +83,48 @@ class RenderSystem implements ISystem {
 			var object = o.data;
 			var material:Material = object.renderer.material;
 			// set the MVP
-			if(camera.vDirty || camera.pDirty || object.transform.mWasDirty) {
-				material.setUniform("MVP", Matrix4(FastMatrix4.identity()
-					.multmat(camera.vp)
-					.multmat(object.transform.m)));
-			}
+			material.setUniform("MVP", TUniform.Matrix4(FastMatrix4.identity()
+				.multmat(camera.vp)
+				.multmat(object.transform.m)));
 
 			// set the VP (for shading)
-			if(camera.vDirty || camera.pDirty) material.setUniform("VP", Matrix4(camera.vp));
-			if(object.transform.mWasDirty) material.setUniform("M", Matrix4(object.transform.m));
-			if(camera.vDirty) material.setUniform("V", Matrix4(camera.v));
-			if(camera.pDirty) material.setUniform("P", Matrix4(camera.p));
+			material.setUniform("VP", TUniform.Matrix4(camera.vp));
+			material.setUniform("M", TUniform.Matrix4(object.transform.m));
+			material.setUniform("V", TUniform.Matrix4(camera.v));
+			material.setUniform("P", TUniform.Matrix4(camera.p));
+
+			// set the view position for shading
+			material.setUniform("viewPos", TUniform.Float3(transform.m._30, transform.m._31, transform.m._32));
 
 			// set light data
-			var lightIndex:Int = 0;
-			for(l in lights) {
-				var light:Light = l.data.light;
-
-				// set the uniforms
-				switch(light.type) {
-					case LightType.Directional: {
-						// calculate the light direction
-						var lightDir:FastVector4 = l.data.transform.m.multvec(new FastVector4(0, 0, 1, 0));
-						
-						material.setUniform('DirLights[${lightIndex}].dir', Float3(lightDir.x, lightDir.y, lightDir.z));
-						material.setUniform('DirLights[${lightIndex}].col', RGB(light.colour));
-					}
-				}
-
-				// move on
-				lightIndex++;
+			var dirLightIndex:Int = 0;
+			for(l in dirLights) {
+				var lightDir:FastVector4 = l.data.transform.m.multvec(new FastVector4(0, 0, 1, 0));
+				material.setUniform('dirLights[' + dirLightIndex + '].direction', TUniform.Float3(lightDir.x, lightDir.y, lightDir.z));
+				material.setUniform('dirLights[' + dirLightIndex + '].colour', TUniform.RGB(l.data.light.colour));
+				dirLightIndex++;
+			}
+			var pointLightIndex:Int = 0;
+			for(l in pointLights) {
+				var lt:Transform = l.data.transform;
+				var light:PointLight = l.data.light;
+				material.setUniform('pointLights[' + pointLightIndex + '].position', TUniform.Float3(lt.m._30, lt.m._31, lt.m._32));
+				material.setUniform('pointLights[' + pointLightIndex + '].dist', TUniform.Float(light.distance));
+				material.setUniform('pointLights[' + pointLightIndex + '].colour', TUniform.RGB(light.colour));
+				pointLightIndex++;
+			}
+			var spotLightIndex:Int = 0;
+			for(l in spotLights) {
+				var lt:Transform = l.data.transform;
+				var light:SpotLight = l.data.light;
+				var lightDir:FastVector4 = lt.m.multvec(new FastVector4(0, 0, 1, 0));
+				material.setUniform('spotLights[' + spotLightIndex + '].position', TUniform.Float3(lt.m._30, lt.m._31, lt.m._32));
+				material.setUniform('spotLights[' + spotLightIndex + '].direction', TUniform.Float3(lightDir.x, lightDir.y, lightDir.z));
+				material.setUniform('spotLights[' + spotLightIndex + '].dist', TUniform.Float(light.distance));
+				material.setUniform('spotLights[' + spotLightIndex + '].colour', TUniform.RGB(light.colour));
+				material.setUniform('spotLights[' + spotLightIndex + '].cutOff', TUniform.Float(light.cutOff));
+				material.setUniform('spotLights[' + spotLightIndex + '].outerCutOff', TUniform.Float(light.outerCutOff));
+				spotLightIndex++;
 			}
 
 			// now render!

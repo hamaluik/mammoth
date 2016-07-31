@@ -6,6 +6,7 @@ project.windowOptions = {
 };
 
 project.addSources('src');
+project.addAssets('assets/**')
 
 project.addLibrary("mammoth");
 project.addLibrary("edge");
@@ -36,8 +37,6 @@ project.addLibrary("edge");
 	}
 })();
 
-//project.addDefine('debug');
-//project.addDefine('source-map-content');
 project.addParameter('-debug');
 project.addParameter('-D source-map-content');
 
