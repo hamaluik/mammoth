@@ -93,14 +93,15 @@ class RenderSystem implements ISystem {
 		}
 
 		// setup the viewport
-		/*var vpX:Int = Std.int(camera.viewportMin.x * Mammoth.width);
+		var vpX:Int = Std.int(camera.viewportMin.x * Mammoth.width);
 		var vpY:Int = Std.int(camera.viewportMin.y * Mammoth.height);
 		var vpW:Int = Std.int((camera.viewportMax.x - camera.viewportMin.x) * Mammoth.width);
 		var vpH:Int = Std.int((camera.viewportMax.y - camera.viewportMin.y) * Mammoth.height);
 		graphics.viewport(vpX, vpY, vpW, vpH);
-		graphics.scissor(vpX, vpY, vpW, vpH);*/
-		//graphics.clear(camera.clearColour); // TODO: component-defined clearing
+		graphics.scissor(vpX, vpY, vpW, vpH);
 		graphics.clear();
+		// for some reason, clearing with a colour does weird things!
+		//graphics.clear(camera.clearColour); // TODO: component-defined clearing
 
 		Mammoth.stats.drawCalls = 0;
 		for(o in objects) {
