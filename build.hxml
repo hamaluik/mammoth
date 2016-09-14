@@ -1,0 +1,29 @@
+-cp src
+
+-cp C:\HaxeToolkit\haxe\lib\kha\git\Sources
+-cp C:\HaxeToolkit\haxe\lib\kha\git\Backends\HTML5
+-cp D:\Projects\personal\mammoth\src
+-cp C:\HaxeToolkit\haxe\lib\zui\1,0,0\Sources
+-cp C:\HaxeToolkit\haxe\lib\edge\git\src
+-cp C:\HaxeToolkit\haxe\lib\thx,core\0,40,1\src
+-cp C:\HaxeToolkit\haxe\lib\edge\git\src
+-cp C:\HaxeToolkit\haxe\lib\thx,core\0,40,1\src
+-cp D:\Projects\personal\mammoth
+-cp C:\HaxeToolkit\haxe\lib\zui\1,0,0
+-cp C:\HaxeToolkit\haxe\lib\edge\git
+-cp C:\HaxeToolkit\haxe\lib\thx,core\0,40,1
+-cp C:\HaxeToolkit\haxe\lib\edge\git
+-cp C:\HaxeToolkit\haxe\lib\thx,core\0,40,1
+-D sys_g1
+-D sys_g2
+-D sys_g3
+-D sys_g4
+-D sys_a1
+-D sys_a2
+-D sys_html5
+-D kha
+-D kha_version=1607
+-D thx_core
+-D thx_core
+
+-js bin/derp.js

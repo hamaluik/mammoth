@@ -1,0 +1,2 @@
+--macro mammoth.macros.Assets.copyDefaultAssets()
+--macro mammoth.macros.Assets.copyProjectAssets()

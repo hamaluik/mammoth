@@ -45,6 +45,29 @@ class Mammoth {
 	private static var _ui:Zui;
 	private static var _showDebug:Bool = false;
 
+	public static var fullscreen(get, set):Bool;
+	public static function get_fullscreen():Bool {
+		return kha.SystemImpl.isFullscreen();
+	}
+	public static function set_fullscreen(v:Bool):Bool {
+		if(v) kha.SystemImpl.requestFullscreen();
+		else {
+			kha.SystemImpl.exitFullscreen();
+			if(mouseLocked)
+				mouseLocked = false;
+		}
+		return fullscreen;
+	}
+
+	public static var mouseLocked(get, set):Bool;
+	public static function get_mouseLocked():Bool
+		return kha.SystemImpl.isMouseLocked();
+	public static function set_mouseLocked(v:Bool):Bool {
+		if(v) kha.SystemImpl.lockMouse();
+		else kha.SystemImpl.unlockMouse();
+		return mouseLocked;
+	}
+
 	@:allow(mammoth.systems.RenderSystem)
 	private static var frameBuffer:Framebuffer;
 
